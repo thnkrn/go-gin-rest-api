@@ -23,6 +23,8 @@ func main() {
 
 	r := gin.New()
 
+	r.POST("/login", loginHandler)
+
 	protected := r.Group("/", authorizationMiddleware)
 
 	protected.GET("/books", handler.listBooksHandler)
@@ -58,11 +60,19 @@ func authorizationMiddleware(c *gin.Context) {
 }
 
 func validateToken(token string) error {
-	if token == "" {
-		return fmt.Errorf("token should not be empty")
+	if token != "ACCESS_TOKEN" {
+		return fmt.Errorf("token provided was invalid")
 	}
 
 	return nil
+}
+
+func loginHandler(c *gin.Context) {
+	// implement login logic here
+
+	c.JSON(http.StatusOK, gin.H{
+		"token": "ACCESS_TOKEN",
+	})
 }
 
 func (h *Handler) listBooksHandler(c *gin.Context) {
