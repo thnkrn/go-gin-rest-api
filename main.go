@@ -40,5 +40,18 @@ func main() {
 		c.JSON(http.StatusCreated, book)
 	})
 
+	r.DELETE("/books/:id", func(c *gin.Context) {
+		id := c.Param("id")
+
+		for i, a := range books {
+			if a.ID == id {
+				books = append(books[:i], books[i+1:]...)
+				break
+			}
+		}
+
+		c.Status(http.StatusNoContent)
+	})
+
 	r.Run()
 }
