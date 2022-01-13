@@ -25,5 +25,20 @@ func main() {
 		c.JSON(http.StatusOK, books)
 	})
 
+	r.POST("/books", func(c *gin.Context) {
+		var book Book
+
+		if err := c.ShouldBindJSON(&book); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"error": err.Error(),
+			})
+			return
+		}
+
+		books = append(books, book)
+
+		c.JSON(http.StatusCreated, book)
+	})
+
 	r.Run()
 }
