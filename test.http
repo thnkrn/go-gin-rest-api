@@ -1,0 +1,11 @@
+GET http://localhost:8080/books
+###
+
+POST http://localhost:8080/books
+Content-Type: application/json
+
+{
+  "id": "4",
+  "title": "The Godfather",
+  "author": "John Lark"
+}
