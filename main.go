@@ -23,9 +23,11 @@ func main() {
 
 	r := gin.New()
 
-	r.GET("/books", handler.listBooksHandler)
-	r.POST("/books", handler.createBookHandler)
-	r.DELETE("/books/:id", handler.deleteBookHandler)
+	protected := r.Group("/", authorizationMiddleware)
+
+	protected.GET("/books", handler.listBooksHandler)
+	protected.POST("/books", handler.createBookHandler)
+	protected.DELETE("/books/:id", handler.deleteBookHandler)
 
 	r.Run()
 }
@@ -44,6 +46,17 @@ type Book struct {
 	Author string `json:"author"`
 }
 
+func authorizationMiddleware(c *gin.Context) {
+	s := c.Request.Header.Get("Authorization")
+
+	token := strings.TrimPrefix(s, "Bearer ")
+
+	if err := validateToken(token); err != nil {
+		c.AbortWithStatus(http.StatusUnauthorized)
+		return
+	}
+}
+
 func validateToken(token string) error {
 	if token == "" {
 		return fmt.Errorf("token should not be empty")
@@ -53,15 +66,6 @@ func validateToken(token string) error {
 }
 
 func (h *Handler) listBooksHandler(c *gin.Context) {
-	s := c.Request.Header.Get("Authorization")
-
-	token := strings.TrimPrefix(s, "Bearer ")
-
-	if err := validateToken(token); err != nil {
-		c.AbortWithStatus(http.StatusUnauthorized)
-		return
-	}
-
 	var books []Book
 
 	if result := h.db.Find(&books); result.Error != nil {
@@ -72,15 +76,6 @@ func (h *Handler) listBooksHandler(c *gin.Context) {
 }
 
 func (h *Handler) createBookHandler(c *gin.Context) {
-	s := c.Request.Header.Get("Authorization")
-
-	token := strings.TrimPrefix(s, "Bearer ")
-
-	if err := validateToken(token); err != nil {
-		c.AbortWithStatus(http.StatusUnauthorized)
-		return
-	}
-
 	var book Book
 
 	if err := c.BindJSON(&book); err != nil {
@@ -95,15 +90,6 @@ func (h *Handler) createBookHandler(c *gin.Context) {
 }
 
 func (h *Handler) deleteBookHandler(c *gin.Context) {
-	s := c.Request.Header.Get("Authorization")
-
-	token := strings.TrimPrefix(s, "Bearer ")
-
-	if err := validateToken(token); err != nil {
-		c.AbortWithStatus(http.StatusUnauthorized)
-		return
-	}
-
 	id := c.Param("id")
 
 	if result := h.db.Delete(&Book{}, id); result.Error != nil {
