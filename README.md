@@ -1,1 +1,1 @@
-GO Web service with Gin
+GO Restful API service with Gin framework and Gorm SQLite
