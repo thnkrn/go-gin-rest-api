@@ -5,10 +5,10 @@ POST http://localhost:8080/books
 Content-Type: application/json
 
 {
-  "id": "4",
+  "id": "1",
   "title": "The Godfather",
   "author": "John Lark"
 }
 ###
 
-DELETE http://localhost:8080/books/4
+DELETE http://localhost:8080/books/1
