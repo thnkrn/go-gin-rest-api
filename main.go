@@ -4,8 +4,10 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
@@ -60,18 +62,33 @@ func authorizationMiddleware(c *gin.Context) {
 }
 
 func validateToken(token string) error {
-	if token != "ACCESS_TOKEN" {
-		return fmt.Errorf("token provided was invalid")
-	}
+	_, err := jwt.Parse(token, func(t *jwt.Token) (interface{}, error) {
+		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method: %v", t.Header["alg"])
+		}
 
-	return nil
+		return []byte("MySignature"), nil
+	})
+
+	return err
 }
 
 func loginHandler(c *gin.Context) {
 	// implement login logic here
 
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, &jwt.StandardClaims{
+		ExpiresAt: time.Now().Add(5 * time.Minute).Unix(),
+	})
+
+	ss, err := token.SignedString([]byte("MySignature"))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
+	}
+
 	c.JSON(http.StatusOK, gin.H{
-		"token": "ACCESS_TOKEN",
+		"token": ss,
 	})
 }
 

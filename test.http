@@ -1,10 +1,12 @@
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2NDIwNTY3ODh9.VIOBX4lquZKsIO3UAWphYvxY4oFtyAs7325-6LGQ8Mk
+
 GET http://localhost:8080/books
-Authorization: Bearer ACCESS_TOKEN
+Authorization: Bearer {{token}}
 ###
 
 POST http://localhost:8080/books
 Content-Type: application/json
-Authorization: Bearer ACCESS_TOKEN
+Authorization: Bearer {{token}}
 
 {
   "id": "1",
@@ -14,7 +16,7 @@ Authorization: Bearer ACCESS_TOKEN
 ###
 
 DELETE http://localhost:8080/books/1
-Authorization: Bearer ACCESS_TOKEN
+Authorization: Bearer {{token}}
 ###
 
 POST http://localhost:8080/login
