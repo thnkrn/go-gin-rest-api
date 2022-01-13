@@ -8,11 +8,8 @@ import (
 	"gorm.io/gorm"
 )
 
-var db *gorm.DB
-
 func main() {
-	var err error
-	db, err = gorm.Open(sqlite.Open("test.db"), &gorm.Config{})
+	db, err := gorm.Open(sqlite.Open("test.db"), &gorm.Config{})
 
 	if err != nil {
 		panic("failed to connect database")
@@ -20,13 +17,23 @@ func main() {
 
 	db.AutoMigrate(&Book{})
 
+	handler := newHandler(db)
+
 	r := gin.New()
 
-	r.GET("/books", listBooksHandler)
-	r.POST("/books", createBookHandler)
-	r.DELETE("/books/:id", deleteBookHandler)
+	r.GET("/books", handler.listBooksHandler)
+	r.POST("/books", handler.createBookHandler)
+	r.DELETE("/books/:id", handler.deleteBookHandler)
 
 	r.Run()
+}
+
+type Handler struct {
+	db *gorm.DB
+}
+
+func newHandler(db *gorm.DB) *Handler {
+	return &Handler{db}
 }
 
 type Book struct {
@@ -35,10 +42,10 @@ type Book struct {
 	Author string `json:"author"`
 }
 
-func listBooksHandler(c *gin.Context) {
+func (h *Handler) listBooksHandler(c *gin.Context) {
 	var books []Book
 
-	if result := db.Find(&books); result.Error != nil {
+	if result := h.db.Find(&books); result.Error != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": result.Error.Error(),
 		})
@@ -48,7 +55,7 @@ func listBooksHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, &books)
 }
 
-func createBookHandler(c *gin.Context) {
+func (h *Handler) createBookHandler(c *gin.Context) {
 	var book Book
 
 	if err := c.ShouldBindJSON(&book); err != nil {
@@ -58,7 +65,7 @@ func createBookHandler(c *gin.Context) {
 		return
 	}
 
-	if result := db.Create(&book); result.Error != nil {
+	if result := h.db.Create(&book); result.Error != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": result.Error.Error(),
 		})
@@ -68,10 +75,10 @@ func createBookHandler(c *gin.Context) {
 	c.JSON(http.StatusCreated, &book)
 }
 
-func deleteBookHandler(c *gin.Context) {
+func (h *Handler) deleteBookHandler(c *gin.Context) {
 	id := c.Param("id")
 
-	if result := db.Delete(&Book{}, id); result.Error != nil {
+	if result := h.db.Delete(&Book{}, id); result.Error != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": result.Error.Error(),
 		})
