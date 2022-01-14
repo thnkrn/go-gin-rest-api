@@ -1,5 +1,8 @@
 @token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2NDIwNTY3ODh9.VIOBX4lquZKsIO3UAWphYvxY4oFtyAs7325-6LGQ8Mk
 
+POST http://localhost:8080/login
+###
+
 GET http://localhost:8080/books
 Authorization: Bearer {{token}}
 ###
@@ -18,5 +21,3 @@ Authorization: Bearer {{token}}
 DELETE http://localhost:8080/books/1
 Authorization: Bearer {{token}}
 ###
-
-POST http://localhost:8080/login
